@@ -1,0 +1,134 @@
+from abc import ABC, abstractmethod
+
+class Person(ABC):
+    total_people = 0
+
+  def __init__(self, name, age):
+        self.name = name
+        self.age = age
+        Person.total_people += 1
+
+  @classmethod
+    def total_people_count(cls):
+        return f"Total people (students and professors): {cls.total_people}"
+
+  @abstractmethod
+    def display_info(self):
+        return f"Name: {self.name}, Age: {self.age}"
+
+
+class Student(Person):
+    total_students = 0
+
+  def __init__(self, name, age, student_id, address, grades, courses=None):
+        super().__init__(name, age)
+        self.student_id = student_id
+        self.address = address
+        self.__grades = grades
+        self.courses = courses if courses is not None else []
+        Student.total_students += 1
+
+  def enroll_in_course(self, course):
+        available_courses = ["Math", "Computer Science", "Physics", "Chemistry"]
+        if course in available_courses:
+            self.courses.append(course)
+            print(f"{self.name} has enrolled in {course}")
+        else:
+            print(f"Course {course} is not available")
+
+  def get_grades(self):
+        return self.__grades
+
+  def is_passed(self):
+        return "Passed" if self.__grades[0] >= 50 else "Failed"
+
+  def display_info(self):
+        course_list = ', '.join(self.courses) if self.courses else "No courses enrolled"
+        return f"Name: {self.name}, Age: {self.age}, Student ID: {self.student_id}, Address: {self.address}, Courses: {course_list}, Grades: {self.__grades}, Status: {self.is_passed()}"
+
+  @classmethod
+    def total_students_count(cls):
+        return f"Total students: {cls.total_students}"
+
+
+class Professor(Person):
+    total_professors = 0
+
+  def __init__(self, name, age, professor_id, subjects=None):
+        super().__init__(name, age)
+        self.professor_id = professor_id
+        self.subjects = subjects if subjects is not None else []
+        Professor.total_professors += 1
+
+  def assign_subject(self, subject):
+        available_subjects = ["Math", "Computer Science", "Physics", "Chemistry"]
+        if subject in available_subjects:
+            self.subjects.append(subject)
+            print(f"{self.name} has been assigned to teach {subject}")
+        else:
+            print(f"Subject {subject} is not available")
+
+  def display_info(self):
+        subject_list = ', '.join(self.subjects) if self.subjects else "No subjects assigned"
+        return f"Name: {self.name}, Age: {self.age}, Professor ID: {self.professor_id}, Subjects: {subject_list}"
+
+  @classmethod
+    def total_professors_count(cls):
+        return f"Total professors: {cls.total_professors}"
+
+
+class University:
+    def __init__(self):
+        self.people = []  # Store both students and professors in a single list
+
+  def add_person(self, person):
+        if isinstance(person, Person):
+            self.people.append(person)
+            print(f"{person.name} has been added to the university.")
+        else:
+            print("Only instances of Person or its subclasses can be added.")
+
+  def display_all_people(self):
+        print("\nAll People in University:")
+        if self.people:
+            for person in self.people:
+                print(person.display_info())  # Polymorphic behavior
+        else:
+            print("No people in university.")
+
+  def display_totals(self):
+        print(Student.total_students_count())
+        print(Professor.total_professors_count())
+        print(Person.total_people_count())
+
+
+# Creating university
+uni = University()
+
+# Creating students
+student1 = Student("Ali", 20, "S001", "123 Main St", (38, 98), ["Math", "Computer Science"])
+student2 = Student("Noor", 22, "S002", "456 Oak St", (93, 80), ["Physics", "Chemistry"])
+
+# Adding students to university
+uni.add_person(student1)
+uni.add_person(student2)
+
+# Creating professors
+prof1 = Professor("Dr. Smith", 45, "P001", ["Math", "Physics"])
+prof2 = Professor("Dr. Jones", 50, "P002", ["Chemistry"])
+
+# Adding professors to university
+uni.add_person(prof1)
+uni.add_person(prof2)
+
+# Testing course enrollment for students
+student1.enroll_in_course("Biology")  # Not available
+student1.enroll_in_course("Math")     # Available
+
+# Testing subject assignment for professors
+prof1.assign_subject("History")       # Not available
+prof2.assign_subject("Chemistry")     # Available
+
+# Display all people and totals
+uni.display_totals()
+uni.display_all_people()
